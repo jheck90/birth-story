@@ -1,0 +1,11 @@
+# binary
+birth-story
+
+# env / secrets
+.envrc
+
+# persisted update data
+data/
+
+# macOS
+.DS_Store

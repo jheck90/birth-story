@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Baby is on the way!</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Georgia, 'Times New Roman', serif;
+      background: #fdf0f5;
+      color: #3a2a30;
+      min-height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 2.5rem 1rem 2rem;
+      background: #fff;
+      border-bottom: 1px solid #f0d8e4;
+      box-shadow: 0 2px 10px rgba(180, 80, 120, 0.07);
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #b05a7a;
+      margin-bottom: 0.4rem;
+      letter-spacing: 0.01em;
+    }
+
+    header p {
+      color: #c0909a;
+      font-style: italic;
+      font-size: 0.95rem;
+    }
+
+    main {
+      max-width: 620px;
+      margin: 2rem auto 4rem;
+      padding: 0 1rem;
+    }
+
+    #empty {
+      text-align: center;
+      color: #c0a0aa;
+      font-style: italic;
+      margin-top: 3rem;
+      font-size: 1.05rem;
+    }
+
+    .update {
+      background: #fff;
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 2px 8px rgba(180, 80, 120, 0.08);
+      display: flex;
+      align-items: flex-start;
+      gap: 0.85rem;
+    }
+
+    .update.new {
+      animation: slidein 0.35s ease;
+    }
+
+    @keyframes slidein {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .dot {
+      color: #e8a0bc;
+      font-size: 1.1rem;
+      padding-top: 3px;
+      flex-shrink: 0;
+    }
+
+    .time {
+      font-size: 0.78rem;
+      color: #b07888;
+      white-space: nowrap;
+      padding-top: 4px;
+      min-width: 3.8rem;
+      flex-shrink: 0;
+      font-style: italic;
+    }
+
+    .text {
+      font-size: 1rem;
+      line-height: 1.55;
+      color: #3a2a30;
+    }
+
+    #status {
+      text-align: center;
+      font-size: 0.75rem;
+      color: #d0a0b0;
+      margin-top: 2rem;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Baby is on the way! 🎀</h1>
+    <p>Live updates from the delivery room</p>
+  </header>
+  <main>
+    <div id="feed">
+      {{if not .}}
+      <p id="empty">No updates yet — check back soon! 🍼</p>
+      {{end}}
+      {{range .}}
+      <div class="update">
+        <span class="dot">●</span>
+        <span class="time">{{.Timestamp.Format "3:04 PM"}}</span>
+        <span class="text">{{.Text}}</span>
+      </div>
+      {{end}}
+    </div>
+    <p id="status">Connecting for live updates…</p>
+  </main>
+
+  <script>
+    const feed   = document.getElementById('feed');
+    const status = document.getElementById('status');
+
+    function removeEmpty() {
+      const el = document.getElementById('empty');
+      if (el) el.remove();
+    }
+
+    function addUpdate(text, timestamp) {
+      removeEmpty();
+
+      const div  = document.createElement('div');
+      div.className = 'update new';
+
+      const dot  = document.createElement('span');
+      dot.className = 'dot';
+      dot.textContent = '●';
+
+      const time = document.createElement('span');
+      time.className = 'time';
+      const d = new Date(timestamp);
+      time.textContent = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const txt  = document.createElement('span');
+      txt.className = 'text';
+      txt.textContent = text; // textContent — no XSS risk
+
+      div.appendChild(dot);
+      div.appendChild(time);
+      div.appendChild(txt);
+      feed.prepend(div);
+    }
+
+    const es = new EventSource('/events');
+
+    es.onopen = () => {
+      status.textContent = 'Connected — updates will appear automatically.';
+    };
+
+    es.onmessage = (e) => {
+      const u = JSON.parse(e.data);
+      addUpdate(u.text, u.timestamp);
+    };
+
+    es.onerror = () => {
+      status.textContent = 'Reconnecting…';
+    };
+  </script>
+</body>
+</html>
