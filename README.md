@@ -6,6 +6,8 @@ in real time — no refresh needed.
 
 > Built with [Claude Code](https://claude.ai/claude-code) by Anthropic.
 
+![Mobile preview](mobile.png)
+
 ---
 
 ## How it works
