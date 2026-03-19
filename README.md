@@ -61,12 +61,29 @@ so it appears instantly).
 
 ---
 
-## Build & push
+## Releasing
+
+Releases use semver tags. Pushing a `v*` tag triggers the GitHub Actions workflow which:
+- Builds Go binaries for `linux/amd64`, `linux/arm64`, `darwin/amd64`, `darwin/arm64`
+- Builds and pushes a multi-arch Docker image (`linux/amd64` + `linux/arm64`)
+- Creates a GitHub release with the binaries attached and auto-generated notes
 
 ```bash
-make release          # build + push :latest and :<git-sha> to Docker Hub
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Required GitHub secrets: `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN`.
+
+### Manual build & push
+
+```bash
+make release          # build + push using current git tag (or SHA if untagged)
 make build            # build only
 make push             # push only
+
+# Override version explicitly
+make release VERSION=v1.0.0
 ```
 
 ---
@@ -78,8 +95,8 @@ Store secrets as a Nomad variable at `secret/discord-birth-story` then run:
 ```bash
 nomad job run birth-story.nomad.hcl
 
-# deploy a specific image tag
-nomad job run -var image_tag=abc1234 birth-story.nomad.hcl
+# deploy a specific semver release
+nomad job run -var image_tag=v1.0.0 birth-story.nomad.hcl
 ```
 
 Example job file:
