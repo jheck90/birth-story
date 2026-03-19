@@ -28,16 +28,18 @@ so restarts don't wipe the feed.
 
 ## Environment variables
 
-| Variable              | Required | Description                                          |
-|-----------------------|----------|------------------------------------------------------|
-| `DISCORD_TOKEN`       | Yes      | Bot token (Discord Developer Portal → Bot)           |
-| `DISCORD_APP_ID`      | Yes      | Application ID (General Information)                 |
-| `DISCORD_GUILD_ID`    | Yes      | Your server's Guild ID                               |
-| `DISCORD_PUBLIC_KEY`  | Yes      | Public Key (General Information)                     |
-| `PORT`                | No       | HTTP port (default `8080`)                           |
-| `UPDATE_FILE`         | No       | Path to persist updates as JSON (e.g. `/data/updates.json`) |
+| Variable              | Required | Default           | Description                                          |
+|-----------------------|----------|-------------------|------------------------------------------------------|
+| `DISCORD_TOKEN`       | Yes      | —                 | Bot token (Discord Developer Portal → Bot)           |
+| `DISCORD_APP_ID`      | Yes      | —                 | Application ID (General Information)                 |
+| `DISCORD_GUILD_ID`    | Yes      | —                 | Your server's Guild ID                               |
+| `DISCORD_PUBLIC_KEY`  | Yes      | —                 | Public Key (General Information)                     |
+| `FAMILY_NAME`         | No       | `Our`             | Last name shown in subtitle: "Live updates from the [X] Family" |
+| `TZ`                  | No       | `America/Denver`  | Timezone for timestamps — any [tz database name](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones) |
+| `PORT`                | No       | `8080`            | HTTP port                                            |
+| `UPDATE_FILE`         | No       | —                 | Path to persist updates as JSON (e.g. `/data/updates.json`) |
 
-Copy `.env.example` to `.envrc` and fill in the values.
+Copy `.envrc` and fill in the values.
 
 ---
 
@@ -135,6 +137,8 @@ job "birth-story" {
 
       env {
         UPDATE_FILE = "/data/updates.json"
+        TZ          = "America/Denver"
+        FAMILY_NAME = "Smith"
       }
 
       resources {

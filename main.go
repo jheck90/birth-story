@@ -16,10 +16,12 @@ func main() {
 	appID     := mustEnv("DISCORD_APP_ID")
 	guildID   := mustEnv("DISCORD_GUILD_ID")
 	publicKey := mustEnv("DISCORD_PUBLIC_KEY")
-	port      := getEnv("PORT", "8080")
+	port       := getEnv("PORT", "8080")
 	updateFile := os.Getenv("UPDATE_FILE")
+	timezone   := getEnv("TZ", "America/Denver")
+	familyName := getEnv("FAMILY_NAME", "Our")
 
-	store := NewStore(updateFile)
+	store := NewStore(updateFile, timezone)
 
 	log.Println("Registering /update slash command with Discord...")
 	if err := registerCommand(appID, guildID, token); err != nil {
@@ -30,7 +32,7 @@ func main() {
 	tmpl := template.Must(template.ParseFS(templateFS, "templates/index.html"))
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", indexHandler(store, tmpl))
+	mux.HandleFunc("GET /{$}", indexHandler(store, tmpl, familyName))
 	mux.HandleFunc("GET /events", eventsHandler(store))
 	mux.HandleFunc("POST /interactions", interactionsHandler(store, publicKey))
 

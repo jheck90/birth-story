@@ -17,13 +17,20 @@ type Store struct {
 	mu     sync.RWMutex
 	items  []Update
 	file   string
+	loc    *time.Location
 	subsMu sync.Mutex
 	subs   map[chan Update]struct{}
 }
 
-func NewStore(file string) *Store {
+func NewStore(file, timezone string) *Store {
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		log.Printf("warn: unknown timezone %q, falling back to UTC: %v", timezone, err)
+		loc = time.UTC
+	}
 	s := &Store{
 		file: file,
+		loc:  loc,
 		subs: make(map[chan Update]struct{}),
 	}
 	if file != "" {
@@ -33,7 +40,7 @@ func NewStore(file string) *Store {
 }
 
 func (s *Store) Add(text string) {
-	u := Update{Text: text, Timestamp: time.Now().UTC()}
+	u := Update{Text: text, Timestamp: time.Now().In(s.loc)}
 
 	s.mu.Lock()
 	s.items = append(s.items, u)

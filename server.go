@@ -9,13 +9,18 @@ import (
 	"time"
 )
 
-func indexHandler(store *Store, tmpl *template.Template) http.HandlerFunc {
+type pageData struct {
+	FamilyName string
+	Updates    []Update
+}
+
+func indexHandler(store *Store, tmpl *template.Template, familyName string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		updates := store.All()
 		// Reverse in place so newest appears first in the template.
 		slices.Reverse(updates)
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		tmpl.Execute(w, updates)
+		tmpl.Execute(w, pageData{FamilyName: familyName, Updates: updates})
 	}
 }
 

@@ -5,33 +5,45 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Baby is on the way!</title>
   <style>
+    /* Aura theme — https://github.com/daltonmenezes/aura-theme */
+    :root {
+      --bg:        #15141b;
+      --surface:   #1e1c28;
+      --border:    #3d375e;
+      --fg:        #edecee;
+      --muted:     #6d6d6d;
+      --purple:    #a277ff;
+      --teal:      #61ffca;
+      --blue:      #82e2ff;
+      --orange:    #ffca85;
+    }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: Georgia, 'Times New Roman', serif;
-      background: #fdf0f5;
-      color: #3a2a30;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
       min-height: 100vh;
     }
 
     header {
       text-align: center;
       padding: 2.5rem 1rem 2rem;
-      background: #fff;
-      border-bottom: 1px solid #f0d8e4;
-      box-shadow: 0 2px 10px rgba(180, 80, 120, 0.07);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
     }
 
     header h1 {
       font-size: 2rem;
-      color: #b05a7a;
+      font-weight: 600;
+      color: var(--purple);
       margin-bottom: 0.4rem;
       letter-spacing: 0.01em;
     }
 
     header p {
-      color: #c0909a;
-      font-style: italic;
+      color: var(--muted);
       font-size: 0.95rem;
     }
 
@@ -43,78 +55,77 @@
 
     #empty {
       text-align: center;
-      color: #c0a0aa;
+      color: var(--muted);
       font-style: italic;
       margin-top: 3rem;
       font-size: 1.05rem;
     }
 
     .update {
-      background: #fff;
-      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
       padding: 1rem 1.25rem;
       margin-bottom: 0.75rem;
-      box-shadow: 0 2px 8px rgba(180, 80, 120, 0.08);
       display: flex;
       align-items: flex-start;
       gap: 0.85rem;
     }
 
     .update.new {
-      animation: slidein 0.35s ease;
+      animation: slidein 0.3s ease;
     }
 
     @keyframes slidein {
-      from { opacity: 0; transform: translateY(-10px); }
+      from { opacity: 0; transform: translateY(-8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
     .dot {
-      color: #e8a0bc;
-      font-size: 1.1rem;
+      color: var(--teal);
+      font-size: 1rem;
       padding-top: 3px;
       flex-shrink: 0;
     }
 
     .time {
       font-size: 0.78rem;
-      color: #b07888;
+      color: var(--blue);
       white-space: nowrap;
-      padding-top: 4px;
-      min-width: 3.8rem;
+      padding-top: 3px;
+      min-width: 7rem;
       flex-shrink: 0;
-      font-style: italic;
+      font-family: monospace;
     }
 
     .text {
       font-size: 1rem;
       line-height: 1.55;
-      color: #3a2a30;
+      color: var(--fg);
     }
 
     #status {
       text-align: center;
       font-size: 0.75rem;
-      color: #d0a0b0;
+      color: var(--muted);
       margin-top: 2rem;
-      font-style: italic;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Baby is on the way! 🎀</h1>
-    <p>Live updates from the delivery room</p>
+    <h1>Baby is on the way! ✨</h1>
+    <p>Live updates from the {{.FamilyName}} Family</p>
   </header>
   <main>
     <div id="feed">
-      {{if not .}}
+      {{if not .Updates}}
       <p id="empty">No updates yet — check back soon! 🍼</p>
       {{end}}
-      {{range .}}
+      {{range .Updates}}
       <div class="update">
         <span class="dot">●</span>
-        <span class="time">{{.Timestamp.Format "3:04 PM"}}</span>
+        <span class="time">{{.Timestamp.Format "Jan 2, 3:04 PM"}}</span>
         <span class="text">{{.Text}}</span>
       </div>
       {{end}}
@@ -144,7 +155,7 @@
       const time = document.createElement('span');
       time.className = 'time';
       const d = new Date(timestamp);
-      time.textContent = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      time.textContent = d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 
       const txt  = document.createElement('span');
       txt.className = 'text';
