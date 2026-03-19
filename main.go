@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 //go:embed templates/index.html
@@ -20,6 +21,7 @@ func main() {
 	updateFile := os.Getenv("UPDATE_FILE")
 	timezone   := getEnv("TZ", "America/Denver")
 	familyName := getEnv("FAMILY_NAME", "Our")
+	allowedUsers := parseAllowedUsers(os.Getenv("ALLOWED_DISCORD_IDS"))
 
 	store := NewStore(updateFile, timezone)
 
@@ -34,7 +36,7 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", indexHandler(store, tmpl, familyName))
 	mux.HandleFunc("GET /events", eventsHandler(store))
-	mux.HandleFunc("POST /interactions", interactionsHandler(store, publicKey))
+	mux.HandleFunc("POST /interactions", interactionsHandler(store, publicKey, allowedUsers))
 
 	log.Printf("Listening on :%s", port)
 	log.Fatal(http.ListenAndServe(":"+port, mux))
@@ -46,6 +48,18 @@ func mustEnv(key string) string {
 		log.Fatalf("Required env var %s is not set", key)
 	}
 	return v
+}
+
+// parseAllowedUsers converts a comma-separated string of Discord user IDs into
+// a set. Returns an empty set if the env var is unset (no restriction applied).
+func parseAllowedUsers(raw string) map[string]struct{} {
+	set := make(map[string]struct{})
+	for _, id := range strings.Split(raw, ",") {
+		if id := strings.TrimSpace(id); id != "" {
+			set[id] = struct{}{}
+		}
+	}
+	return set
 }
 
 func getEnv(key, fallback string) string {

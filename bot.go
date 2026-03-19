@@ -25,8 +25,13 @@ const (
 const flagEphemeral = 64
 
 type interaction struct {
-	Type int              `json:"type"`
-	Data *interactionData `json:"data"`
+	Type   int              `json:"type"`
+	Data   *interactionData `json:"data"`
+	Member *struct {
+		User struct {
+			ID string `json:"id"`
+		} `json:"user"`
+	} `json:"member"`
 }
 
 type interactionData struct {
@@ -49,7 +54,7 @@ type interactionRespData struct {
 	Flags   int    `json:"flags,omitempty"`
 }
 
-func interactionsHandler(store *Store, publicKeyHex string) http.HandlerFunc {
+func interactionsHandler(store *Store, publicKeyHex string, allowedUsers map[string]struct{}) http.HandlerFunc {
 	pubKeyBytes, err := hex.DecodeString(publicKeyHex)
 	if err != nil || len(pubKeyBytes) != ed25519.PublicKeySize {
 		panic(fmt.Sprintf("DISCORD_PUBLIC_KEY is invalid: %v", err))
@@ -86,6 +91,16 @@ func interactionsHandler(store *Store, publicKeyHex string) http.HandlerFunc {
 			if in.Data == nil || in.Data.Name != "update" {
 				http.Error(w, "unknown command", http.StatusBadRequest)
 				return
+			}
+			if len(allowedUsers) > 0 {
+				uid := ""
+				if in.Member != nil {
+					uid = in.Member.User.ID
+				}
+				if _, ok := allowedUsers[uid]; !ok {
+					replyEphemeral(w, "You are not allowed to post updates.")
+					return
+				}
 			}
 			msg := optionValue(in.Data.Options, "message")
 			if msg == "" {
